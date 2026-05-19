@@ -1,109 +1,45 @@
-import React from "react";
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { useSubscription } from "../App";
+import React, { useState } from 'react';
+import {
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, ActivityIndicator, Alert
+} from 'react-native';
 
-export default function HomeScreen() {
-  const navigation = useNavigation();
-  const { isPremium, dailyGenerations } = useSubscription();
+export default function HomeScreen({ navigation }) {
+  const [prompt, setPrompt] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const generateMusic = async () => {
+    if (!prompt) {
+      Alert.alert('Enter a music description first!');
+      return;
+    }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      navigation.navigate('Paywall');
+    }, 2000);
+  };
 
   return (
-    <SafeAreaView style={s.root}>
-      <LinearGradient colors={["#0A0A0F", "#0A0A0F"]} style={StyleSheet.absoluteFill} />
-      <View style={s.content}>
-        <Text style={s.greeting}>Good vibes,{"\n"}let's create. 🎵</Text>
-
-        <View style={s.statRow}>
-          <View style={s.statCard}>
-            <Text style={s.statValue}>{dailyGenerations}</Text>
-            <Text style={s.statLabel}>Today's tracks</Text>
-          </View>
-          <View style={[s.statCard, { borderColor: isPremium ? "#E8C547" : "#1A1A2E" }]}>
-            <MaterialCommunityIcons
-              name={isPremium ? "crown" : "lock"}
-              size={22}
-              color={isPremium ? "#E8C547" : "#555"}
-            />
-            <Text style={s.statLabel}>{isPremium ? "Premium" : "Free Tier"}</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={s.quickBtn}
-          onPress={() => navigation.navigate("Generator")}
-        >
-          <LinearGradient colors={["#E8C547", "#C9A227"]} style={s.quickGrad}>
-            <MaterialCommunityIcons name="music-note-plus" size={20} color="#0A0A0F" />
-            <Text style={s.quickText}>Generate a Track</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-
-        {!isPremium && (
-          <TouchableOpacity
-            style={s.upgradeRow}
-            onPress={() => navigation.navigate("Paywall")}
-          >
-            <Text style={s.upgradeText}>
-              ⭐ Upgrade to Premium — $14.99/month{"\n"}
-              Unlimited tracks up to 5 minutes!
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.title}>🎵 AI Music Generator</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Describe your music..."
+        value={prompt}
+        onChangeText={setPrompt}
+      />
+      <TouchableOpacity style={styles.button} onPress={generateMusic}>
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Generate Music</Text>}
+      </TouchableOpacity>
+    </View>
   );
 }
 
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#0A0A0F" },
-  content: { flex: 1, paddingHorizontal: 24, paddingTop: 32 },
-  greeting: {
-    fontFamily: "Syne-Bold",
-    fontSize: 34,
-    color: "#FFF",
-    lineHeight: 44,
-    marginBottom: 32,
-  },
-  statRow: { flexDirection: "row", gap: 12, marginBottom: 32 },
-  statCard: {
-    flex: 1,
-    backgroundColor: "#0F0F1C",
-    borderRadius: 18,
-    padding: 20,
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#1A1A2E",
-  },
-  statValue: { fontFamily: "Syne-Bold", fontSize: 28, color: "#FFF" },
-  statLabel: {
-    fontFamily: "DMSans-Regular",
-    fontSize: 12,
-    color: "#666",
-    marginTop: 4,
-  },
-  quickBtn: { borderRadius: 28, overflow: "hidden", marginBottom: 16 },
-  quickGrad: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 18,
-    gap: 10,
-  },
-  quickText: { fontFamily: "Syne-Bold", fontSize: 16, color: "#0A0A0F" },
-  upgradeRow: {
-    backgroundColor: "#E8C54715",
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#E8C54730",
-  },
-  upgradeText: {
-    fontFamily: "DMSans-Regular",
-    fontSize: 13,
-    color: "#E8C547",
-    textAlign: "center",
-    lineHeight: 22,
-  },
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: '#0a0a0a', justifyContent: 'center' },
+  title: { fontSize: 28, color: '#fff', fontWeight: 'bold', textAlign: 'center', marginBottom: 30 },
+  input: { backgroundColor: '#1a1a1a', color: '#fff', padding: 15, borderRadius: 10, fontSize: 16, marginBottom: 20 },
+  button: { backgroundColor: '#6c63ff', padding: 15, borderRadius: 10, alignItems: 'center' },
+  buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
 });
